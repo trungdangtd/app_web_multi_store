@@ -2,6 +2,7 @@ import 'package:app_web_multi_store/views/side_bar_screen/buyer_screen.dart';
 import 'package:app_web_multi_store/views/side_bar_screen/category_screen.dart';
 import 'package:app_web_multi_store/views/side_bar_screen/order_screen.dart';
 import 'package:app_web_multi_store/views/side_bar_screen/product_screen.dart';
+import 'package:app_web_multi_store/views/side_bar_screen/subcategory_screen.dart';
 import 'package:app_web_multi_store/views/side_bar_screen/upload_banner_screen.dart';
 import 'package:app_web_multi_store/views/side_bar_screen/vendor_sreen.dart';
 import 'package:flutter/cupertino.dart';
@@ -43,7 +44,11 @@ class _MainScreensState extends State<MainScreens> {
           _selectedScreen = const CategoryScreen();
         });
         break;
-
+      case SubcategoryScreen.id:
+        setState(() {
+          _selectedScreen = const SubcategoryScreen();
+        });
+        break;
       case UploadBannerScreen.id:
         setState(() {
           _selectedScreen = const UploadBannerScreen();
@@ -101,6 +106,10 @@ class _MainScreensState extends State<MainScreens> {
               title: 'Danh mục',
               route: CategoryScreen.id,
               icon: Icons.category),
+          AdminMenuItem(
+              title: 'Danh mục con',
+              route: SubcategoryScreen.id,
+              icon: Icons.category_outlined),
           AdminMenuItem(
               title: 'Thêm Banner',
               route: UploadBannerScreen.id,

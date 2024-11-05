@@ -1,23 +1,31 @@
 import 'package:app_web_multi_store/controllers/category_controller.dart';
-import 'package:app_web_multi_store/views/side_bar_screen/widgets/categories_widget.dart';
+import 'package:app_web_multi_store/controllers/subcategory_controller.dart';
+import 'package:app_web_multi_store/models/category.dart';
+import 'package:app_web_multi_store/views/side_bar_screen/widgets/subcategory_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
-class CategoryScreen extends StatefulWidget {
-  static const String id = '/category';
-  const CategoryScreen({super.key});
+class SubcategoryScreen extends StatefulWidget {
+  static const String id = '/subcategory';
+
+  const SubcategoryScreen({super.key});
 
   @override
-  State<CategoryScreen> createState() => _CategoryScreenState();
+  State<SubcategoryScreen> createState() => _SubcategoryScreenState();
 }
 
-class _CategoryScreenState extends State<CategoryScreen> {
+class _SubcategoryScreenState extends State<SubcategoryScreen> {
+  final SubcategoryController subcategoryController = SubcategoryController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final CategoryController _categoryController = CategoryController();
+  late Future<List<Category>> futureCategories;
   late String name;
+  Category? selectedCategory;
+  @override
+  void initState() {
+    super.initState();
+    futureCategories = CategoryController().loadCategoriess();
+  }
 
-  dynamic _bannerImage;
-  // ignore: unused_field
   dynamic _image;
   pickImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -28,19 +36,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
     if (result != null) {
       setState(() {
         _image = result.files.first.bytes;
-      });
-    }
-  }
-
-  pickBannerImage() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-    );
-
-    if (result != null) {
-      setState(() {
-        _bannerImage = result.files.first.bytes;
       });
     }
   }
@@ -58,7 +53,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               child: Container(
                   alignment: Alignment.topLeft,
                   child: const Text(
-                    'Danh mục sản phẩm',
+                    'Danh mục sản phẩm con',
                     style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
                   )),
             ),
@@ -68,6 +63,35 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 color: Colors.grey,
               ),
             ),
+            FutureBuilder(
+                future: futureCategories,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text("Lỗi: ${snapshot.error}"),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text("Không có banner nào"),
+                    );
+                  } else {
+                    return DropdownButton<Category>(
+                        value: selectedCategory,
+                        hint: const Text('Chọn loại sản phẩm'),
+                        items: snapshot.data!.map((Category category) {
+                          return DropdownMenuItem(
+                              value: category, child: Text(category.name));
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCategory = value;
+                          });
+                          print(selectedCategory!.name);
+                        });
+                  }
+                }),
             Row(
               children: [
                 Container(
@@ -80,7 +104,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   child: Center(
                     child: _image != null
                         ? Image.memory(_image)
-                        : const Text('Ảnh loại sản phẩm'),
+                        : const Text('Ảnh loại sản phẩm con'),
                   ),
                 ),
                 Padding(
@@ -93,29 +117,30 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       },
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Vui lòng nhập tên loại sản phẩm';
+                          return 'Vui lòng nhập tên loại sản phẩm con';
                         }
                         return null;
                       },
                       decoration: const InputDecoration(
-                        labelText: 'Nhập tên loại sản phẩm',
+                        labelText: 'Nhập tên loại sản phẩm con',
                       ),
                     ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('Huỷ'),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      _categoryController.uploadCategory(
+                      await subcategoryController.uploadSubcategory(
+                          categoryId: selectedCategory!.id,
+                          categoryName: selectedCategory!.name,
                           pickedImage: _image,
-                          pickedBanner: _bannerImage,
-                          name: name,
+                          subCategoryName: name,
                           context: context);
+                      setState(() {
+                        _formKey.currentState!.reset();
+                        _image = null;
+                      });
                     }
                   },
                   child: const Text(
@@ -137,34 +162,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             const Divider(
               color: Colors.grey,
             ),
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: _bannerImage != null
-                    ? Image.memory(_bannerImage)
-                    : const Text(
-                        'Ảnh category Banner',
-                        style: TextStyle(color: Colors.white),
-                      ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    pickBannerImage();
-                  },
-                  child: const Text('Thêm ảnh')),
-            ),
-            const Divider(
-              color: Colors.grey,
-            ),
-            const CategoriesWidget(),
+            const SubcategoryWidget(),
           ],
         ),
       ),
