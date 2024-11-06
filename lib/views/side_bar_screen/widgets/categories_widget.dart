@@ -1,6 +1,5 @@
 import 'package:app_web_multi_store/controllers/category_controller.dart';
 import 'package:app_web_multi_store/models/category.dart';
-import 'package:app_web_multi_store/models/subcategory.dart';
 import 'package:flutter/material.dart';
 
 class CategoriesWidget extends StatefulWidget {
@@ -14,7 +13,6 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
   late Future<List<Category>> futureCategories;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     futureCategories = CategoryController().loadCategoriess();
   }

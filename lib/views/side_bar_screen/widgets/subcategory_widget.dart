@@ -30,7 +30,7 @@ class _SubCategoriesWidgetState extends State<SubcategoryWidget> {
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
-              child: Text("Không có banner nào"),
+              child: Text("Không có danh mục nào"),
             );
           } else {
             final subcategory = snapshot.data!;
