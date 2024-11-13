@@ -56,7 +56,7 @@ class SubcategoryController {
         },
       );
 
-      print(response.body);
+
       if (response.statusCode == 200) {
         List<dynamic> data = jsonDecode(response.body);
 
